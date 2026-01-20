@@ -214,10 +214,12 @@ class VivintAuth:
         """Bypass or enable a sensor."""
         # Partition ID may contain pipe character - don't let requests encode it
         url = f"{API_ENDPOINT}/{panel_id}/{partition_id}/sensors/{sensor_id}"
-        logger.info(f"Bypass URL: {url}")
+        # Bypass values: 0 = enabled, 2 = bypassed
+        bypass_value = 2 if bypass else 0
+        logger.info(f"Bypass URL: {url}, bypass_value: {bypass_value}")
         resp = self.session.put(
             url,
-            json={"_id": sensor_id, "b": 1 if bypass else 0}
+            json={"_id": sensor_id, "b": bypass_value}
         )
         resp.raise_for_status()
         return resp.json()
