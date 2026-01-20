@@ -10,6 +10,8 @@ services:
         sync: false
       - key: VIVINT_PASSWORD
         sync: false
+      - key: VIVINT_REFRESH_TOKEN
+        sync: false
       - key: VIVINT_SENSOR_ID
         sync: false
       - key: VIVINT_SENSOR_NAME
