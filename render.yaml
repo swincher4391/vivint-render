@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: vivint-bypass
+    runtime: python
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: python -m gunicorn app:app
+    envVars:
+      - key: VIVINT_USERNAME
+        sync: false
+      - key: VIVINT_PASSWORD
+        sync: false
+      - key: VIVINT_SENSOR_ID
+        sync: false
+      - key: VIVINT_SENSOR_NAME
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      # RENDER_EXTERNAL_URL is auto-provided by Render
