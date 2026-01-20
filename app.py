@@ -69,6 +69,8 @@ class VivintAuth:
     def _refresh_token(self, refresh_token):
         """Use refresh token to get new access token."""
         try:
+            logger.info(f"Using refresh token (first 20 chars): {refresh_token[:20] if refresh_token else 'None'}...")
+
             resp = self.session.post(
                 f"{AUTH_ENDPOINT}/oauth2/token",
                 data={
@@ -77,6 +79,8 @@ class VivintAuth:
                     "client_id": "ios"
                 }
             )
+
+            logger.info(f"Token refresh status: {resp.status_code}")
 
             if resp.status_code == 200:
                 token_data = resp.json()
@@ -316,6 +320,18 @@ def home():
 @app.route("/health")
 def health():
     return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()})
+
+
+@app.route("/debug")
+def debug():
+    """Debug endpoint to check configuration."""
+    return jsonify({
+        "refresh_token_set": bool(VIVINT_REFRESH_TOKEN),
+        "refresh_token_preview": VIVINT_REFRESH_TOKEN[:20] + "..." if VIVINT_REFRESH_TOKEN else None,
+        "sensor_id": SENSOR_ID,
+        "sensor_name": SENSOR_NAME,
+        "username_set": bool(VIVINT_USERNAME)
+    })
 
 
 @app.route("/bypass")
