@@ -212,8 +212,11 @@ class VivintAuth:
 
     def bypass_sensor(self, panel_id, partition_id, sensor_id, bypass=True):
         """Bypass or enable a sensor."""
+        # Partition ID may contain pipe character - don't let requests encode it
+        url = f"{API_ENDPOINT}/{panel_id}/{partition_id}/sensors/{sensor_id}"
+        logger.info(f"Bypass URL: {url}")
         resp = self.session.put(
-            f"{API_ENDPOINT}/{panel_id}/{partition_id}/sensors/{sensor_id}",
+            url,
             json={"_id": sensor_id, "b": 1 if bypass else 0}
         )
         resp.raise_for_status()
@@ -246,7 +249,13 @@ def run_bypass():
             if not partitions:
                 continue
 
-            partition_id = partitions[0].get("_id")
+            partition_id_raw = partitions[0].get("_id")
+            # Partition ID may be "panelid|num" format - extract just the number
+            if isinstance(partition_id_raw, str) and "|" in partition_id_raw:
+                partition_id = partition_id_raw.split("|")[1]
+            else:
+                partition_id = partition_id_raw
+            logger.info(f"Panel ID: {panel_id}, Partition ID: {partition_id}")
             arm_state = partitions[0].get("arm", 0)
             devices = partitions[0].get("d", [])
 
@@ -359,7 +368,11 @@ def trigger_enable():
             if not partitions:
                 continue
 
-            partition_id = partitions[0].get("_id")
+            partition_id_raw = partitions[0].get("_id")
+            if isinstance(partition_id_raw, str) and "|" in partition_id_raw:
+                partition_id = partition_id_raw.split("|")[1]
+            else:
+                partition_id = partition_id_raw
             devices = partitions[0].get("d", [])
 
             for device in devices:
